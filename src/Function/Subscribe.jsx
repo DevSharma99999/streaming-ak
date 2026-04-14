@@ -13,7 +13,7 @@ const Subscribe = ({ channelId, currentUser }) => {
             if (!currentUser || !channelId || channelId === "undefined") return;
             
             try {
-                const res = await axios.get(`http://localhost:5000/api/v1/users/is-subscribed/${channelId}`, { withCredentials: true });
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/is-subscribed/${channelId}`, { withCredentials: true });
                 setIsSubscribed(res.data.isSubscribed);
             } catch (err) {
                 // Only log if the request actually fails
@@ -35,7 +35,7 @@ const Subscribe = ({ channelId, currentUser }) => {
 
         setLoading(true);
         try {
-            const res = await axios.post(`http://localhost:5000/api/v1/users/subscribe/${channelId}`, {}, { withCredentials: true });
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/users/subscribe/${channelId}`, {}, { withCredentials: true });
             setIsSubscribed(res.data.subscribed);
         } catch (err) {
             console.error("Subscription toggle failed:", err);

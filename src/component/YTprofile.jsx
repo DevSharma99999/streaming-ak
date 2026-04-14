@@ -20,7 +20,7 @@ const Profile = ({ isDarkMode, onBack, user, profileData: profileDataProp, onSel
   const fetchProfile = async () => {
     try {
       if (!profileDataProp) setLoading(true);
-      const res = await axios.get("http://localhost:5000/api/v1/users/profile", { withCredentials: true });
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/profile`, { withCredentials: true });
       if (res.data.success) setProfileData(res.data.data);
     } catch (err) {
       console.log(err);
@@ -55,7 +55,7 @@ const Profile = ({ isDarkMode, onBack, user, profileData: profileDataProp, onSel
   const handleDelete = async (videoId) => {
     if (!window.confirm("Delete this video?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/v1/videos/delete/${videoId}`, { withCredentials: true });
+      await axios.delete(`${import.meta.env.VITE_API_URL}/v1/videos/delete/${videoId}`, { withCredentials: true });
       setProfileData({
         ...profileData,
         videos: profileData.videos.filter(v => v._id !== videoId)
@@ -75,7 +75,7 @@ const Profile = ({ isDarkMode, onBack, user, profileData: profileDataProp, onSel
       : editingVideo.tags;
 
     const res = await axios.patch(
-      `http://localhost:5000/api/v1/videos/update/${editingVideo._id}`,
+      `${import.meta.env.VITE_API_URL}/api/v1/videos/update/${editingVideo._id}`,
       {
         title: editingVideo.title,
         description: editingVideo.description,

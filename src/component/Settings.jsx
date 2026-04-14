@@ -27,7 +27,7 @@ const SettingsPage = ({ user, setUser }) => {
     const fetchUser = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:5000/api/v1/users/profile",
+          `${import.meta.env.VITE_API_URL}/api/v1/users/profile`,
           { withCredentials: true }
         );
 
@@ -48,7 +48,7 @@ const SettingsPage = ({ user, setUser }) => {
 
     try {
       const res = await axios.patch(
-        "http://localhost:5000/api/v1/users/update-account",
+        `${import.meta.env.VITE_API_URL}/api/v1/users/update-account`,
         { fullName, email },
         { withCredentials: true }
       );
@@ -78,7 +78,7 @@ const SettingsPage = ({ user, setUser }) => {
       const endpoint = type === 'avatar' ? '/avatar' : '/cover-image';
 
       const res = await axios.patch(
-        `http://localhost:5000/api/v1/users${endpoint}`,
+        `${import.meta.env.VITE_API_URL}/api/v1/users${endpoint}`,
         formData,
         {
           withCredentials: true,

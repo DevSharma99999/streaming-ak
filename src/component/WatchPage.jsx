@@ -73,7 +73,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
   useEffect(() => {
     const checkPlaylist = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/v1/playlists", {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/playlists`, {
           withCredentials: true
         });
 
@@ -96,7 +96,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
     
     try {
       // Simple Algo: Fetch videos in the same category, or with similar tags
-      const res = await axios.get(`http://localhost:5000/api/v1/videos/related/${videoId}`, {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/videos/related/${videoId}`, {
         params: {
           category: currentVideo.category,
           tags: currentVideo.tags?.join(',')
@@ -118,8 +118,8 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
     const loadData = async () => {
       try {
         const [metaRes, commRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/v1/videos/v/${videoId}`, { withCredentials: true }),
-          axios.get(`http://localhost:5000/api/v1/comments/${videoId}`)
+          axios.get(`${import.meta.env.VITE_API_URL}/api/v1/videos/v/${videoId}`, { withCredentials: true }),
+          axios.get(`${import.meta.env.VITE_API_URL}/api/v1/comments/${videoId}`)
         ]);
         const fetchedData = metaRes.data.data;
         const startTime = video?.watchedTime !== undefined ? video.watchedTime : fetchedData.watchedTime;
@@ -176,7 +176,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
 
     try {
       lastSavedTimeRef.current = time;
-      await axios.patch("http://localhost:5000/api/v1/users/history/progress",
+      await axios.patch(`${import.meta.env.VITE_API_URL}/api/v1/users/history/progress`,
         { videoId, watchedTime: timeToSave },
         { withCredentials: true }
       );
@@ -289,7 +289,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
   useEffect(() => {
     const fetchPlaylists = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/v1/playlists", {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/playlists`, {
           withCredentials: true
         });
         setPlaylists(res.data.data);
@@ -316,7 +316,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
     setSummaryStatus("loading");
 
     const res = await axios.get(
-      `http://localhost:5000/api/ai/summary/${videoId}`
+      `${import.meta.env.VITE_API_URL}/api/ai/summary/${videoId}`
     );
 
     if (res.data.status === "processing") {
@@ -449,7 +449,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
 
     if (current > 5 && !viewCountedRef.current) {
       viewCountedRef.current = true;
-      axios.post(`http://localhost:5000/api/v1/videos/v/${videoId}/view`, {}, { withCredentials: true });
+      axios.post(`${import.meta.env.VITE_API_URL}/api/v1/videos/v/${videoId}/view`, {}, { withCredentials: true });
     }
   };
 
@@ -475,10 +475,10 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
   const handleToggleWatchLater = async () => {
     if (!user) return alert("Please Sign In!");
     try {
-      const res = await axios.post(`http://localhost:5000/api/v1/videos/v/${videoId}/watch-later`, {}, { withCredentials: true });
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/videos/v/${videoId}/watch-later`, {}, { withCredentials: true });
       setIsWatchLater(res.data.isWatchLater);
       if (setUser && res.data.success) {
-        const profile = await axios.get("http://localhost:5000/api/v1/users/profile", { withCredentials: true });
+        const profile = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/profile`, { withCredentials: true });
         setUser(profile.data.data);
       }
     } catch (err) { alert("Failed to update Watch Later"); }
@@ -488,7 +488,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
     e.preventDefault();
     if (!user) return alert("Please Sign In!");
     try {
-      const res = await axios.post(`http://localhost:5000/api/v1/comments/${videoId}`, { content: commentText }, { withCredentials: true });
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/comments/${videoId}`, { content: commentText }, { withCredentials: true });
       setComments(prev => [res.data.data, ...prev]);
       setCommentText("");
     } catch (err) { alert("Comment failed"); }
@@ -500,7 +500,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
 
     try {
       const res = await axios.post(
-        `http://localhost:5000/api/v1/comments/${videoId}`,
+        `${import.meta.env.VITE_API_URL}/api/v1/comments/${videoId}`,
         { content: replyText[id], parent: id },
         { withCredentials: true }
       );
@@ -568,7 +568,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
   // Like
   const handleLikeComment = async (id) => {
     const res = await axios.post(
-      `http://localhost:5000/api/v1/comments/like/${id}`,
+      `${import.meta.env.VITE_API_URL}/api/v1/comments/like/${id}`,
       {},
       { withCredentials: true }
     );
@@ -578,7 +578,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
   // Dislike
   const handleDislikeComment = async (id) => {
     const res = await axios.post(
-      `http://localhost:5000/api/v1/comments/dislike/${id}`,
+      `${import.meta.env.VITE_API_URL}/api/v1/comments/dislike/${id}`,
       {},
       { withCredentials: true }
     );
@@ -1027,7 +1027,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
                       key={p._id}
                       onClick={async () => {
                         await axios.post(
-                          `http://localhost:5000/api/v1/playlists/${p._id}/add`,
+                          `${import.meta.env.VITE_API_URL}/api/v1/playlists/${p._id}/add`,
                           { videoId },
                           { withCredentials: true }
                         );
@@ -1056,7 +1056,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
 
                       try {
                         const res = await axios.post(
-                          "http://localhost:5000/api/v1/playlists",
+                          `${import.meta.env.VITE_API_URL}/api/v1/playlists`,
                           { name: newPlaylistName },
                           { withCredentials: true }
                         );
@@ -1069,7 +1069,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
 
                           // Add current video to the newly created playlist
                           await axios.post(
-                            `http://localhost:5000/api/v1/playlists/${pid}/add`,
+                            `${import.meta.env.VITE_API_URL}/api/v1/playlists/${pid}/add`,
                             { videoId },
                             { withCredentials: true }
                           );

@@ -10,7 +10,7 @@ export default function WatchLater({ isDarkMode, onSelectVideo }) {
     useEffect(() => {
         const loadWatchLater = async () => {
             try {
-                const res = await axios.get("http://localhost:5000/api/v1/users/watch-later", { withCredentials: true });
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/watch-later`, { withCredentials: true });
                 setVideos(res.data.data || []);
             } catch (err) {
                 if (err.response?.status === 401) {

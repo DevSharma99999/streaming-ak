@@ -9,7 +9,7 @@ const HistoryPage = ({ isDarkMode, onSelectVideo }) => {
     useEffect(() => {
         const fetchHistory = async () => {
             try {
-                const res = await axios.get("http://localhost:5000/api/v1/users/history", { withCredentials: true });
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/history`, { withCredentials: true });
                 setHistory(res.data.data);
             } catch (err) {
                 console.error("Failed to fetch history");
@@ -23,7 +23,7 @@ const HistoryPage = ({ isDarkMode, onSelectVideo }) => {
     const clearHistory = async () => {
         if (!window.confirm("Clear all watch history?")) return;
         try {
-            await axios.delete("http://localhost:5000/api/v1/users/history/clear", { withCredentials: true });
+            await axios.delete(`${import.meta.env.VITE_API_URL}/api/v1/users/history/clear`, { withCredentials: true });
             setHistory([]);
         } catch (err) {
             alert("Failed to clear history");

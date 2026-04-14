@@ -11,7 +11,7 @@ const SubscriptionsPage = ({ isDarkMode, onBack, currentUser, onSelectChannel })
   useEffect(() => {
     const fetchSubscriptions = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/v1/users/subscriptions", { withCredentials: true });
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/subscriptions`, { withCredentials: true });
         setSubscriptions(res.data.data || []);
       } catch (err) {
         setError(err.response?.data?.message || err.message || "Failed to load subscriptions");

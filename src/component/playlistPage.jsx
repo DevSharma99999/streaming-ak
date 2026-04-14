@@ -10,7 +10,7 @@ export default function PlaylistPage({ playlistId, onBack, onSelectVideo }) {
     try {
       setLoading(true);
       const res = await axios.get(
-        `http://localhost:5000/api/v1/playlists/${playlistId}`,
+        `${import.meta.env.VITE_API_URL}/api/v1/playlists/${playlistId}`,
         { withCredentials: true }
       );
       setVideos(res.data.data.videos);
@@ -31,7 +31,7 @@ export default function PlaylistPage({ playlistId, onBack, onSelectVideo }) {
 
     try {
       await axios.post(
-        `http://localhost:5000/api/v1/playlists/${playlistId}/remove`,
+        `${import.meta.env.VITE_API_URL}/api/v1/playlists/${playlistId}/remove`,
         { videoId },
         { withCredentials: true }
       );

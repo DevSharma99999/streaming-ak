@@ -57,7 +57,7 @@ function YouTubeDesign() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/v1/users/profile", { withCredentials: true });
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/users/profile`, { withCredentials: true });
         setUser(res.data.data);
       } catch (err) {
         setUser(null);
@@ -71,7 +71,7 @@ function YouTubeDesign() {
   //     const fetchVideos = async () => {
   //       try {
   //         setIsLoading(true);
-  //         const response = await axios.get("http://localhost:5000/api/v1/videos");
+  //         const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/videos`);
   //         const formattedVideos = response.data.data.map(v => ({
   //   id: v._id,
   //   src: v.videoUrl,
@@ -101,8 +101,8 @@ const fetchVideosByCategory = async (category) => {
     setPageno(1); // Reset pagination
     
     const url = category === "All" 
-      ? `http://localhost:5000/api/v1/videos?page=1&limit=10`
-      : `http://localhost:5000/api/v1/videos?category=${category}&page=1&limit=10`;
+      ? `${import.meta.env.VITE_API_URL}/api/v1/videos?page=1&limit=10`
+      : `${import.meta.env.VITE_API_URL}/api/v1/videos?category=${category}&page=1&limit=10`;
 
     const response = await axios.get(url);
     const formatted = response.data.data.map(v => ({
@@ -145,7 +145,7 @@ const fetchVideos = async (pageNum = 1, category = activeCategory) => {
 
         const categoryParam = category !== "All" ? `&category=${category}` : "";
         // Fetch 12 at a time
-        const response = await axios.get(`http://localhost:5000/api/v1/videos?page=${pageNum}&limit=12${categoryParam}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/videos?page=${pageNum}&limit=12${categoryParam}`);
 
         const newFetchedVideos = response.data.data.map(v => ({
             id: v._id,
@@ -199,7 +199,7 @@ const fetchVideos = async (pageNum = 1, category = activeCategory) => {
 
   const handleLogout = async () => {
     try {
-      await axios.post("http://localhost:5000/api/v1/users/logout");
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/users/logout`);
       setUser(null);
       setShow('Home');
     } catch (err) {
@@ -341,7 +341,7 @@ onSearchSubmit={async (results, query) => {
   try {
     let finalResults = results;
     if (!results || results.length === 0) {
-      const res = await axios.get(`http://localhost:5000/api/v1/videos/search?q=${query}`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/videos/search?q=${query}`);
       finalResults = res.data;
     }
 

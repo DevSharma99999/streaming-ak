@@ -72,7 +72,7 @@ const CreatePost = ({ isOpen, onClose, isDarkMode, onUpload }) => {
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/api/v1/videos/upload", data, {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/videos/upload`, data, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true
       });

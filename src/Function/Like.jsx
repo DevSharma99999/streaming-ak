@@ -12,7 +12,7 @@ const LikeDislike = ({ videoId, isDarkMode, user }) => {
         const fetchStatus = async () => {
             if (!videoId) return;
             try {
-                const res = await axios.get(`http://localhost:5000/api/v1/videos/v/${videoId}`, { withCredentials: true });
+                const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/videos/v/${videoId}`, { withCredentials: true });
                 const videoData = res.data.data;
 
                 // ALWAYS set the total counts
@@ -70,7 +70,7 @@ const LikeDislike = ({ videoId, isDarkMode, user }) => {
 
         // --- BACKGROUND SYNC ---
         try {
-            const endpoint = `http://localhost:5000/api/v1/videos/v/${videoId}/${actionType}`;
+            const endpoint = `${import.meta.env.VITE_API_URL}/api/v1/videos/v/${videoId}/${actionType}`;
             const res = await axios.post(endpoint, {}, { withCredentials: true });
 
             if (res.data.success) {

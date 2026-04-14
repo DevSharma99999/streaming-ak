@@ -22,7 +22,7 @@ export default function AuthModal({ isOpen, onClose, isDarkMode, setUser }) {
         ? { email: formData.email, password: formData.password }
         : formData;
 
-      const res = await axios.post(`http://localhost:5000/api/v1${endpoint}`, payload, {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1${endpoint}`, payload, {
         withCredentials: true
       });
 
@@ -44,7 +44,7 @@ export default function AuthModal({ isOpen, onClose, isDarkMode, setUser }) {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post(`http://localhost:5000/api/v1/users/verify-otp`, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/users/verify-otp`, {
         email: formData.email,
         otp: otp
       });
@@ -186,7 +186,7 @@ function ForgotPasswordForm({ onBack }) {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post('http://localhost:5000/api/v1/users/forgot-password', { email });
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/users/forgot-password`, { email });
       setFormStep(2);
     } catch (err) {
       alert(err.response?.data?.message || 'Error sending OTP');
@@ -199,7 +199,7 @@ function ForgotPasswordForm({ onBack }) {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post('http://localhost:5000/api/v1/users/reset-password', {
+      await axios.post(`${import.meta.env.VITE_API_URL}/api/v1/users/reset-password`, {
         email,
         otp,
         newPassword

@@ -34,7 +34,7 @@ const SearchBar = ({ isDarkMode, onSelectVideo, onSearchSubmit }) => {
 
     const fetchResults = async () => {
         try {
-            const { data } = await axios.get(`http://localhost:5000/api/v1/videos/search?q=${query}`);
+            const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/api/v1/videos/search?q=${query}`);
             setResults(data);
             setShowDropdown(true);
         } catch (err) {
