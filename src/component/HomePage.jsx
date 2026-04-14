@@ -24,6 +24,13 @@ import SearchBar from "./search";
   const categories = ["All", "General", "Coding", "Music", "Education", "Entertainment"];
 
 function YouTubeDesign() {
+
+  useEffect(() => {
+    // Pokes the Render backend to wake it up from sleep
+    fetch(`${import.meta.env.VITE_API_URL}/api/v1/health`)
+      .catch(() => { /* Ignore errors, we just want to wake it up */ });
+  }, []);
+  
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [downloadedVideos, setDownloadedVideos] = useState([]);
   const [show, setShow] = useState('Home');
