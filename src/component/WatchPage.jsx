@@ -24,6 +24,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
   const [subCount, setSubCount] = useState(0);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
+  const [queue, setQueue] = useState([]);
   const [isWatchLater, setIsWatchLater] = useState(false);
   const [replyText, setReplyText] = useState({});
   const [showReplyBox, setShowReplyBox] = useState({});
