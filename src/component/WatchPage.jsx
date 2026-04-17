@@ -36,6 +36,7 @@ const clickTimeoutRef = useRef(null);
 const animationRef = useRef(null);
 const [isBuffering, setIsBuffering] = useState(true);
 
+
   const [currentVideo, setCurrentVideo] = useState(video || {});
 
   const [isPlaying, setIsPlaying] = useState(true);
@@ -81,7 +82,6 @@ const [isBuffering, setIsBuffering] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
 
   const [isDownloaded, setIsDownloaded] = useState(false);
-
 
 
   // Settings & Resolution States
@@ -290,7 +290,11 @@ useEffect(() => {
 
   }, [videoId]);
 
-
+useEffect(() => {
+  if (videoRef.current) {
+    videoRef.current.play().catch(() => {});
+  }
+}, [currentVideo, audioUnlocked]);
 
   // --- 2. THE TIMESTAMP SEEKER ---
 
@@ -1160,7 +1164,7 @@ useEffect(() => {
 
                 playsInline
                 autoPlay   // ✅ ADD THIS
-                muted    
+                muted={!audioUnlocked}   
 
                 className="w-full h-full object-contain cursor-pointer bg-black"
 
@@ -1503,17 +1507,14 @@ onClick={(e) => {
 
 
                 <div className="flex flex-wrap gap-2 mt-4">
-  {currentVideo.tags ? (
-    (Array.isArray(currentVideo.tags)
-      ? currentVideo.tags
-      : currentVideo.tags.split(",")
-    ).map((tag, index) => (
+  {Array.isArray(currentVideo.tags) && currentVideo.tags.length > 0 ? (
+    currentVideo.tags.map((tag, index) => (
       <button
         key={index}
-        onClick={() => handleTagClick(tag.trim())}
+        onClick={() => handleTagClick(tag)}
         className="text-red-400 text-xs font-bold px-3 py-1 bg-red-500/10 rounded-full border border-red-500/20 hover:bg-red-500/20 transition-all"
       >
-        #{tag.trim()}
+        #{tag}
       </button>
     ))
   ) : (

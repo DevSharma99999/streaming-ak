@@ -45,6 +45,7 @@ function YouTubeDesign() {
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
+
   
 
 
@@ -59,6 +60,19 @@ function YouTubeDesign() {
 
   const [videos, setVideos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
+
+useEffect(() => {
+  const unlockAudio = () => {
+    setAudioUnlocked(true);
+    window.removeEventListener("click", unlockAudio);
+  };
+
+  window.addEventListener("click", unlockAudio);
+
+  return () => window.removeEventListener("click", unlockAudio);
+}, []);
 
   // 1. Check Login Status
   useEffect(() => {
@@ -342,6 +356,7 @@ case 'VideoPlayer':
       user={user}
       setUser={setUser}
       onSelectVideo={handleSelectVideo}
+      audioUnlocked={audioUnlocked}
       // ✅ ADD THIS PROP BELOW:
       // Inside renderMainContent -> case 'VideoPlayer'
 onSearchSubmit={async (results, query) => {
