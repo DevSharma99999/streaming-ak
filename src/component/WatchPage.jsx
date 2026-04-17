@@ -1087,7 +1087,7 @@ useEffect(() => {
     if (next) {
 
       onSelectVideo(next); };
-
+    }
 
 
   // Like
@@ -2195,6 +2195,4 @@ onDoubleClick={togglePlay}
 }
 
 
-
 export default VideoPlayer;
-
