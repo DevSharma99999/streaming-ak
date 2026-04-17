@@ -127,21 +127,23 @@ const [isBuffering, setIsBuffering] = useState(true);
 
 
   // Helper to format time (e.g., 153 -> 2:33)
-  const normalizeTags = (tags) => {
+ const normalizeTags = (tags) => {
   if (!tags) return [];
 
-  // Case 1: already array
   if (Array.isArray(tags)) {
-    return tags.map(tag => tag.toLowerCase().trim());
+    return [...new Set(tags.map(t => t.toLowerCase().trim()))];
   }
 
-  // Case 2: string like "#karan #aujla"
   if (typeof tags === "string") {
-    return tags
-      .split("#")                 // split by #
-      .map(tag => tag.trim())    // remove spaces
-      .filter(tag => tag.length > 0) // remove empty
-      .map(tag => tag.toLowerCase());
+    return [
+      ...new Set(
+        tags
+          .split(/[#,\s]+/)   // 🔥 split by # OR comma OR space
+          .map(t => t.trim())
+          .filter(t => t.length > 0)
+          .map(t => t.toLowerCase())
+      )
+    ];
   }
 
   return [];
