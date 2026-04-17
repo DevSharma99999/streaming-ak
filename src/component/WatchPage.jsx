@@ -130,15 +130,24 @@ const [isBuffering, setIsBuffering] = useState(true);
  const normalizeTags = (tags) => {
   if (!tags) return [];
 
+  // 🔥 HANDLE ARRAY PROPERLY
   if (Array.isArray(tags)) {
-    return [...new Set(tags.map(t => t.toLowerCase().trim()))];
+    return [
+      ...new Set(
+        tags
+          .flatMap(t => t.split(/[#,\s]+/)) // ✅ split inside array also
+          .map(t => t.trim())
+          .filter(t => t.length > 0)
+          .map(t => t.toLowerCase())
+      )
+    ];
   }
 
   if (typeof tags === "string") {
     return [
       ...new Set(
         tags
-          .split(/[#,\s]+/)   // 🔥 split by # OR comma OR space
+          .split(/[#,\s]+/)
           .map(t => t.trim())
           .filter(t => t.length > 0)
           .map(t => t.toLowerCase())
