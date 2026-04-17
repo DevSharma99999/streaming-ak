@@ -471,10 +471,12 @@ useEffect(() => {
 
   // --- 4. SEAMLESS RESOLUTION SWITCHER ---
 
-  useEffect(() => {
+useEffect(() => {
   const videoElement = videoRef.current;
   if (!videoElement) return;
 
+   videoElement.preload = "auto";
+  videoElement.muted = true;
   const targetUrl =
     currentResolution === "480p" && currentVideo.videoUrl480
       ? currentVideo.videoUrl480
@@ -485,29 +487,59 @@ useEffect(() => {
   const lastTime = videoElement.currentTime;
   const wasPlaying = !videoElement.paused;
 
-  if (hlsRef.current) hlsRef.current.destroy();
+  // destroy old instance
+  if (hlsRef.current) {
+    hlsRef.current.destroy();
+  }
 
   if (Hls.isSupported()) {
-    const hls = new Hls();
+    const hls = new Hls({
+      enableWorker: true,
+      lowLatencyMode: true,
+    });
+
     hlsRef.current = hls;
 
     hls.loadSource(targetUrl);
     hls.attachMedia(videoElement);
 
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+    // ✅ WAIT until video is actually ready
+    hls.on(Hls.Events.LEVEL_LOADED, () => {
       videoElement.currentTime = lastTime;
+    });
 
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
       if (wasPlaying) {
-        videoElement.play().catch(() => {
-          console.warn("Auto-play prevented after resolution switch. User interaction may be required to resume playback.");
-        });
+        videoElement.play().catch(() => {});
       }
     });
+
   } else {
     videoElement.src = targetUrl;
-    videoElement.currentTime = lastTime;
+
+    videoElement.onloadedmetadata = () => {
+      videoElement.currentTime = lastTime;
+      if (wasPlaying) videoElement.play();
+    };
   }
+
 }, [currentResolution, videoId]);
+
+useEffect(() => {
+  const video = videoRef.current;
+  if (!video) return;
+
+  const onPlay = () => setIsPlaying(true);
+  const onPause = () => setIsPlaying(false);
+
+  video.addEventListener("play", onPlay);
+  video.addEventListener("pause", onPause);
+
+  return () => {
+    video.removeEventListener("play", onPlay);
+    video.removeEventListener("pause", onPause);
+  };
+}, []);
 
   //fetch playlists if user is logged in
 
@@ -1139,10 +1171,8 @@ useEffect(() => {
 
                 className="w-full h-full object-contain cursor-pointer bg-black"
 
-                onClick={(e) => {
-e.stopPropagation();
-togglePlay();
-}}
+              onClick={() => setShowControls(prev => !prev)}
+onDoubleClick={togglePlay}
 
                 onTimeUpdate={handleTimeUpdate}
                 onWaiting={() => setIsBuffering(true)}
