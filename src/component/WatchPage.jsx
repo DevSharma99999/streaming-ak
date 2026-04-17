@@ -616,7 +616,7 @@ useEffect(() => {
 
   const handleTagClick = (tag) => {
   if (onSearchSubmit) {
-    onSearchSubmit([tag.trim()], "");
+    onSearchSubmit(tag.trim());
   }
 };
 
