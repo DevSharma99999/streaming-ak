@@ -32,6 +32,8 @@ useEffect(() => {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }, [videoId]);
 
+const clickTimeoutRef = useRef(null);
+const animationRef = useRef(null);
 const [isBuffering, setIsBuffering] = useState(true);
 
   const [currentVideo, setCurrentVideo] = useState(video || {});
@@ -184,6 +186,7 @@ useEffect(() => {
   return () => {
     if (hlsRef.current) {
       hlsRef.current.destroy();
+       hlsRef.current = null;
     }
   };
 }, []);
@@ -221,7 +224,6 @@ useEffect(() => {
       } catch (err) {
 
         console.error("Related videos fetch failed", err);
-        setError("Failed to load videos");
       }
 
     };
@@ -476,7 +478,7 @@ useEffect(() => {
   if (!videoElement) return;
 
    videoElement.preload = "auto";
-  videoElement.muted = true;
+  videoElement.muted = false;
   const targetUrl =
     currentResolution === "480p" && currentVideo.videoUrl480
       ? currentVideo.videoUrl480
@@ -504,15 +506,19 @@ useEffect(() => {
     hls.attachMedia(videoElement);
 
     // ✅ WAIT until video is actually ready
-    hls.on(Hls.Events.LEVEL_LOADED, () => {
-      videoElement.currentTime = lastTime;
-    });
-
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      if (wasPlaying) {
-        videoElement.play().catch(() => {});
-      }
-    });
+   hls.on(Hls.Events.MANIFEST_PARSED, () => {
+  videoElement.currentTime = lastTime;
+  if (wasPlaying) {
+    videoElement.play().catch(() => {});
+  }
+});
+hls.on(Hls.Events.MANIFEST_PARSED, () => {
+  setIsBuffering(false);
+});
+hls.on(Hls.Events.FRAG_BUFFERED, () => {
+  setIsBuffering(false);
+});
+hls.on(Hls.Events.FRAG_LOADED, () => setIsBuffering(false));
 
   } else {
     videoElement.src = targetUrl;
@@ -713,8 +719,8 @@ useEffect(() => {
         const blob = await segRes.blob();
 
 
-
-        await db.put("videos", blob, segments[i].key); // ✅ FIXED
+       const key = segments[i].full.split("?")[0];
+await db.put("videos", blob, key);
          setDownloadProgress(Math.floor(((i + 1) / segments.length) * 100));
 
       }
@@ -848,32 +854,29 @@ useEffect(() => {
   // --- 5. PLAYER UI CONTROLS & DURATION DISPLAY ---
 
   const handleTimeUpdate = () => {
+  if (!videoRef.current) return;
 
-    if (!videoRef.current) return;
+  const current = videoRef.current.currentTime;
+  const total = videoRef.current.duration;
 
-    const current = videoRef.current.currentTime;
+  setCurrentTime(current);
 
-    const total = videoRef.current.duration;
+  if (total > 0) {
+    setProgress((current / total) * 100);
+  }
 
+  animationRef.current = requestAnimationFrame(handleTimeUpdate);
+};
 
+useEffect(() => {
+  animationRef.current = requestAnimationFrame(handleTimeUpdate);
 
-    setCurrentTime(current);
-
-   if (total > 0) {
-  setProgress((current / total) * 100);
-}
-
-
-    if (current > 5 && !viewCountedRef.current) {
-
-      viewCountedRef.current = true;
-
-      axios.post(`${import.meta.env.VITE_API_URL}/api/v1/videos/v/${videoId}/view`, {}, { withCredentials: true });
-
+  return () => {
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
     }
-
   };
-
+}, []);
 
 
   const togglePlay = () => {
@@ -1086,8 +1089,9 @@ useEffect(() => {
 
     if (next) {
 
-      onSelectVideo(next); };
+     handleSelectVideo(next, queue);
     }
+  };
 
 
   // Like
@@ -1171,12 +1175,17 @@ useEffect(() => {
 
                 className="w-full h-full object-contain cursor-pointer bg-black"
 
-              onClick={() => setShowControls(prev => !prev)}
-onDoubleClick={togglePlay}
 
-                onTimeUpdate={handleTimeUpdate}
-                onWaiting={() => setIsBuffering(true)}
-                onPlaying={() => setIsBuffering(false)}
+onClick={(e) => {
+  e.stopPropagation();
+  togglePlay();
+}}
+
+                 onWaiting={() => setIsBuffering(true)}
+  onPlaying={() => setIsBuffering(false)}
+  onCanPlay={() => setIsBuffering(false)}   // ✅ important
+  onSeeking={() => setIsBuffering(true)}    // ✅ when user skips
+  onSeeked={() => setIsBuffering(false)}  
 
               />
 
@@ -1194,7 +1203,11 @@ onDoubleClick={togglePlay}
 
                   <div className="flex gap-4">
 
-                    <button onClick={() => setShowSettings(!showSettings)} className="text-white hover:text-red-400 transition-colors hover:rotate-90 duration-300">
+                    <button
+  onClick={(e) => {
+    e.stopPropagation();   // ✅ IMPORTANT
+    setShowSettings(prev => !prev);
+  }} className="text-white hover:text-red-400 transition-colors hover:rotate-90 duration-300">
 
                       <Settings size={22} />
 
@@ -1375,32 +1388,20 @@ onDoubleClick={togglePlay}
                   <div className="relative group">
 
                     <button
-
-                      onClick={(e) => {
-
-                        e.stopPropagation();
-
-                        setShowDownloadMenu(prev => !prev);
-
-                      }}
-
-                      className="px-4 py-2 bg-red-600/80 hover:bg-red-500/90 backdrop-blur-sm rounded-xl text-sm flex items-center gap-2 transition-all duration-200"
-
-
-
-                    >
-
-                      <button
-
-                        disabled={isDownloaded}
-
-                        className={`px-4 py-2 rounded-full text-sm ${isDownloaded ? "bg-green-600" : "bg-white/10"
-
-                          }`} />
-
-                      Download
-
-                    </button>
+  disabled={isDownloaded}
+  className={`px-4 py-2 rounded-full text-sm ${
+    isDownloaded ? "bg-green-600" : "bg-white/10"
+  }`}
+  onClick={(e) => {
+    e.stopPropagation();
+    setShowDownloadMenu(prev => !prev);
+  }}
+>
+  <span className={`w-4 h-4 rounded-full ${
+    isDownloaded ? "bg-green-400" : "bg-white/10"
+  } animate-pulse`} />
+  Download
+</button>
 
                     {isDownloading && (
 
