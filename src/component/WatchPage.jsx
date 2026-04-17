@@ -478,7 +478,6 @@ useEffect(() => {
   if (!videoElement) return;
 
    videoElement.preload = "auto";
-  videoElement.muted = false;
   const targetUrl =
     currentResolution === "480p" && currentVideo.videoUrl480
       ? currentVideo.videoUrl480
@@ -508,11 +507,11 @@ useEffect(() => {
     // ✅ WAIT until video is actually ready
    hls.on(Hls.Events.MANIFEST_PARSED, () => {
   videoElement.currentTime = lastTime;
+
   if (wasPlaying) {
     videoElement.play().catch(() => {});
   }
-});
-hls.on(Hls.Events.MANIFEST_PARSED, () => {
+
   setIsBuffering(false);
 });
 hls.on(Hls.Events.FRAG_BUFFERED, () => {
@@ -580,22 +579,10 @@ useEffect(() => {
 
 
   const handleTagClick = (tag) => {
-
-    if (onSearchSubmit) {
-
-      // We pass an empty array because the SearchResults page will fetch its own data
-
-      // based on the query string.
-
-      onSearchSubmit([], tag);
-
-    } else {
-
-      console.warn("onSearchSubmit prop is missing in VideoPlayer");
-
-    }
-
-  };
+  if (onSearchSubmit) {
+    onSearchSubmit([tag.trim()], "");
+  }
+};
 
 
 
@@ -1172,6 +1159,8 @@ useEffect(() => {
                 poster={currentVideo.thumbnail || video?.thumbnail}
 
                 playsInline
+                autoPlay   // ✅ ADD THIS
+                muted    
 
                 className="w-full h-full object-contain cursor-pointer bg-black"
 
@@ -1514,34 +1503,25 @@ onClick={(e) => {
 
 
                 <div className="flex flex-wrap gap-2 mt-4">
-
-                  {currentVideo.tags?.length > 0 ? (
-
-                    currentVideo.tags.map((tag, index) => (
-
-                      <button
-
-                        key={index}
-
-                        onClick={() => handleTagClick(tag)}
-
-                        className="text-red-400 text-xs font-bold px-3 py-1 bg-red-500/10 rounded-full border border-red-500/20 hover:bg-red-500/20 transition-all"
-
-                      >
-
-                        #{tag}
-
-                      </button>
-
-                    ))
-
-                  ) : (
-
-                    <span className="text-gray-500 text-xs italic">No tags available</span>
-
-                  )}
-
-                </div>
+  {currentVideo.tags ? (
+    (Array.isArray(currentVideo.tags)
+      ? currentVideo.tags
+      : currentVideo.tags.split(",")
+    ).map((tag, index) => (
+      <button
+        key={index}
+        onClick={() => handleTagClick(tag.trim())}
+        className="text-red-400 text-xs font-bold px-3 py-1 bg-red-500/10 rounded-full border border-red-500/20 hover:bg-red-500/20 transition-all"
+      >
+        #{tag.trim()}
+      </button>
+    ))
+  ) : (
+    <span className="text-gray-500 text-xs italic">
+      No tags available
+    </span>
+  )}
+</div>
 
               </div>
 
