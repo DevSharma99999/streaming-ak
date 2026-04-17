@@ -54,6 +54,7 @@ export default function WatchLater({ isDarkMode, onSelectVideo }) {
                             {/* FIX: Thumbnail Logic consistent with rest of app */}
                             {video.thumbnail ? (
                                 <img
+                                loading="lazy"
                                     src={video.thumbnail}
                                     className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                                     alt={video.title}

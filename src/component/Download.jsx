@@ -84,6 +84,7 @@ const DownloadsPage = ({ isDarkMode, onBack, onSelectVideo }) => {
               } // 🔥 PLAY OFFLINE
             >
               <img
+              loading="lazy"
                 src={video.thumbnail}
                 className="w-32 h-20 object-cover rounded-xl border border-red-500/20"
               />

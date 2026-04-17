@@ -67,6 +67,7 @@ const HistoryPage = ({ isDarkMode, onSelectVideo }) => {
                                     {/* FIX: Use Thumbnail image if available, fallback to video frame */}
                                     {video.thumbnail ? (
                                         <img
+                                        loading="lazy"
                                             src={video.thumbnail}
                                             className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                                             alt={video.title}

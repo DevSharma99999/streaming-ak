@@ -433,7 +433,7 @@ onSearchSubmit={async (results, query) => {
                 className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-red-600 to-red-800 flex items-center justify-center cursor-pointer hover:ring-2 ring-red-500 transition-all duration-200 shrink-0"
               >
                 {user?.avatar ? (
-                  <img src={user.avatar + "?t=" + Date.now()} alt="avatar" className="w-full h-full object-cover" />
+                  <img loading="lazy" src={user.avatar + "?t=" + Date.now()} alt="avatar" className="w-full h-full object-cover" />
                 ) : (
                   <span className="text-sm font-bold text-white">{user?.username?.charAt(0).toUpperCase() || 'U'}</span>
                 )}
@@ -575,7 +575,7 @@ function MainFeed({ isDarkMode, onSelectVideo, videoList, isLoading }) {
             {/* Thumbnail Container */}
             <div className="relative aspect-video rounded-xl overflow-hidden transition-all duration-300 bg-zinc-800 shadow-md group-hover:shadow-xl">
               {video.thumbnail ? (
-                <img src={video.thumbnail} alt={video.title} className="w-full h-full object-cover opacity-100 group-hover:opacity-100 group-hover:scale-105 transition-transform duration-500" />
+                <img loading="lazy" src={video.thumbnail} alt={video.title} className="w-full h-full object-cover opacity-100 group-hover:opacity-100 group-hover:scale-105 transition-transform duration-500" />
               ) : (
                 <video src={`${video.src}#t=2`} muted className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               )}
@@ -586,7 +586,7 @@ function MainFeed({ isDarkMode, onSelectVideo, videoList, isLoading }) {
               {/* Avatar */}
               <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center text-white shrink-0 bg-gradient-to-br from-red-600 to-red-700 font-semibold text-sm">
                 {video.ownerAvatar ? (
-                  <img src={video.ownerAvatar + "?t=" + Date.now()} alt="avatar" className="w-full h-full object-cover" />
+                  <img loading="lazy" src={video.ownerAvatar + "?t=" + Date.now()} alt="avatar" className="w-full h-full object-cover" />
                 ) : (
                   <span>{video.ownerName?.charAt(0).toUpperCase()}</span>
                 )}

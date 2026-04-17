@@ -103,7 +103,7 @@ const SettingsPage = ({ user, setUser }) => {
       <div className="relative">
         <div className="h-56 w-full rounded-2xl overflow-hidden shadow-lg bg-gradient-to-r from-red-600 via-red-700 to-red-600">
           {user?.coverImage ? (
-            <img src={user.coverImage + "?t=" + Date.now()} className="w-full h-full object-cover" alt="cover" />
+            <img loading="lazy" src={user.coverImage + "?t=" + Date.now()} className="w-full h-full object-cover" alt="cover" />
           ) : (
             <div className="w-full h-full" />
           )}
@@ -125,7 +125,7 @@ const SettingsPage = ({ user, setUser }) => {
               className="w-32 h-32 rounded-2xl border-4 border-white overflow-hidden bg-gradient-to-br from-red-600 to-black shadow-xl cursor-pointer hover:shadow-2xl transition-shadow"
             >
               {user?.avatar ? (
-                <img src={user.avatar + "?t=" + Date.now()} className="w-full h-full object-cover" alt="avatar" />
+                <img loading="lazy" src={user.avatar + "?t=" + Date.now()} className="w-full h-full object-cover" alt="avatar" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-white"><User size={48} /></div>
               )}
@@ -247,6 +247,7 @@ const SettingsPage = ({ user, setUser }) => {
             </button>
 
             <img
+            loading="lazy"
               src={user?.avatar}
               className="max-w-[90vw] max-h-[80vh] rounded-xl shadow-2xl"
               alt="preview"

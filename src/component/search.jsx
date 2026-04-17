@@ -92,7 +92,7 @@ const SearchBar = ({ isDarkMode, onSelectVideo, onSearchSubmit }) => {
                             onClick={() => handleResultClick(vid)}
                             className="flex items-center gap-3 p-4 cursor-pointer hover:bg-red-500/20 transition-all duration-200 border-b border-red-500/10 last:border-b-0"
                         >
-                            <img src={vid.thumbnail} alt="thumb" className="w-16 h-10 object-cover rounded-lg border border-red-500/20" />
+                            <img loading="lazy" src={vid.thumbnail} alt="thumb" className="w-16 h-10 object-cover rounded-lg border border-red-500/20" />
                             <div className="flex flex-col overflow-hidden flex-1">
                                 <span className="text-sm font-medium truncate text-white hover:text-red-400 transition-colors duration-200">{vid.title}</span>
                                 <span className="text-xs opacity-70 text-gray-300">{vid.owner?.username || "Unknown"}</span>

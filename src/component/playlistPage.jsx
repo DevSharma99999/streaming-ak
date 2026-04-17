@@ -69,6 +69,7 @@ export default function PlaylistPage({ playlistId, onBack, onSelectVideo }) {
               <div className="relative w-48 h-28 bg-zinc-800 rounded-xl overflow-hidden shrink-0">
                 {v.thumbnail ? (
                   <img
+                  loading="lazy"
                     src={v.thumbnail}
                     alt={v.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

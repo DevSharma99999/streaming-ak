@@ -87,6 +87,7 @@ export default function PlaylistsPage({ onSelect }) {
                 {firstVideo ? (
                   firstVideo.thumbnail ? (
                     <img
+                    loading="lazy"
                       src={firstVideo.thumbnail}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                       alt={p.name}

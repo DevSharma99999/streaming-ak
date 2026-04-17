@@ -111,6 +111,7 @@ const Profile = ({ isDarkMode, onBack, user, profileData: profileDataProp, onSel
 
         {displayUser.coverImage ? (
           <img
+          loading="lazy"
             src={displayUser.coverImage + "?t=" + Date.now()}
             className="w-full h-full object-cover"
           />
@@ -135,6 +136,7 @@ const Profile = ({ isDarkMode, onBack, user, profileData: profileDataProp, onSel
           <div className="w-28 h-28 rounded-full overflow-hidden bg-gradient-to-br from-red-600 to-red-800 border-4 border-red-400/30">
             {displayUser.avatar ? (
               <img
+              loading="lazy"
                 src={displayUser.avatar + "?t=" + Date.now()}
                 className="w-full h-full object-cover"
               />
@@ -180,6 +182,7 @@ const Profile = ({ isDarkMode, onBack, user, profileData: profileDataProp, onSel
                 >
                   {video.thumbnail ? (
                     <img
+                    loading="lazy"
                       src={video.thumbnail}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                     />

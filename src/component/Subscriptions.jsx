@@ -76,7 +76,7 @@ const SubscriptionsPage = ({ isDarkMode, onBack, currentUser, onSelectChannel })
                 <div className="flex items-center gap-5">
                   <div className="w-16 h-16 rounded-full bg-gradient-to-br from-red-600 to-zinc-950 flex items-center justify-center overflow-hidden border border-zinc-800 shadow-xl transition-all duration-300 group-hover:border-red-400/30">
                     {sub.avatar ? (
-                      <img src={sub.avatar} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      <img loading="lazy" src={sub.avatar} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     ) : (
                       <span className="text-xl font-bold text-white">{sub.username?.charAt(0).toUpperCase()}</span>
                     )}

@@ -28,7 +28,11 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
 
   const videoId = video?._id || video?.id;
 
+useEffect(() => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}, [videoId]);
 
+const [isBuffering, setIsBuffering] = useState(true);
 
   const [currentVideo, setCurrentVideo] = useState(video || {});
 
@@ -97,10 +101,6 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
   const [showSummary, setShowSummary] = useState(false);
 
   const [relatedVideos, setRelatedVideos] = useState([]);
-
-
-
-
 
 
 
@@ -180,7 +180,17 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
 
   }, [videoId, user]);
 
-
+useEffect(() => {
+  return () => {
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+    }
+  };
+}, []);
+useEffect(() => {
+  if (!videoId) return;
+  setCurrentResolution("360p");
+}, [videoId]);
 
   useEffect(() => {
 
@@ -211,7 +221,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
       } catch (err) {
 
         console.error("Related videos fetch failed", err);
-
+        setError("Failed to load videos");
       }
 
     };
@@ -326,7 +336,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
 
     // Throttle saves to avoid spamming the server
 
-    if (Math.abs(time - lastSavedTimeRef.current) < 2) return;
+    if (Math.abs(time - lastSavedTimeRef.current) < 5) return;
 
 
 
@@ -407,71 +417,6 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
   }, [playlistVideos, videoList]);
 
 
-
-  useEffect(() => {
-
-    const init = async () => {
-
-      const offline = await loadOfflineVideo();
-
-
-
-      if (!offline) {
-
-        // fallback to normal streaming
-
-        const videoElement = videoRef.current;
-
-        if (!videoElement) return;
-
-
-
-        const targetUrl =
-
-          currentResolution === "480p" && currentVideo.videoUrl480
-
-            ? currentVideo.videoUrl480
-
-            : currentVideo.videoUrl;
-
-
-
-        if (!targetUrl) return;
-
-
-
-        if (hlsRef.current) hlsRef.current.destroy();
-
-
-
-        if (Hls.isSupported()) {
-
-          const hls = new Hls();
-
-          hls.loadSource(targetUrl);
-
-          hls.attachMedia(videoElement);
-
-          hlsRef.current = hls;
-
-        } else {
-
-          videoElement.src = targetUrl;
-
-        }
-
-      }
-
-    };
-
-
-
-    init();
-
-  }, [videoId, currentResolution]);
-
-
-
   useEffect(() => {
 
     const checkDownload = async () => {
@@ -527,50 +472,42 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
   // --- 4. SEAMLESS RESOLUTION SWITCHER ---
 
   useEffect(() => {
+  const videoElement = videoRef.current;
+  if (!videoElement) return;
 
-    const videoElement = videoRef.current;
+  const targetUrl =
+    currentResolution === "480p" && currentVideo.videoUrl480
+      ? currentVideo.videoUrl480
+      : currentVideo.videoUrl;
 
-    if (!videoElement) return;
+  if (!targetUrl) return;
 
-    const targetUrl = (currentResolution === "480p" && currentVideo.videoUrl480)
+  const lastTime = videoElement.currentTime;
+  const wasPlaying = !videoElement.paused;
 
-      ? currentVideo.videoUrl480 : currentVideo.videoUrl || video?.videoUrl;
+  if (hlsRef.current) hlsRef.current.destroy();
 
-    if (!targetUrl) return;
+  if (Hls.isSupported()) {
+    const hls = new Hls();
+    hlsRef.current = hls;
 
-    const lastTime = videoElement.currentTime;
+    hls.loadSource(targetUrl);
+    hls.attachMedia(videoElement);
 
-    if (hlsRef.current) hlsRef.current.destroy();
-
-
-
-    if (Hls.isSupported()) {
-
-      const hls = new Hls({ enableWorker: true });
-
-      hlsRef.current = hls;
-
-      hls.loadSource(targetUrl);
-
-      hls.attachMedia(videoElement);
-
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-
-        videoElement.currentTime = lastTime;
-
-        if (isPlaying) videoElement.play().catch(() => { });
-
-      });
-
-    } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
-
-      videoElement.src = targetUrl;
-
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
       videoElement.currentTime = lastTime;
 
-    }
-
-  }, [currentResolution, videoId, currentVideo.videoUrl480, currentVideo.videoUrl]);
+      if (wasPlaying) {
+        videoElement.play().catch(() => {
+          console.warn("Auto-play prevented after resolution switch. User interaction may be required to resume playback.");
+        });
+      }
+    });
+  } else {
+    videoElement.src = targetUrl;
+    videoElement.currentTime = lastTime;
+  }
+}, [currentResolution, videoId]);
 
   //fetch playlists if user is logged in
 
@@ -737,7 +674,6 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
       }, `${id}-meta`);
 
 
-
       for (let i = 0; i < segments.length; i++) {
 
         const segRes = await fetch(segments[i].full);
@@ -747,6 +683,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
 
 
         await db.put("videos", blob, segments[i].key); // ✅ FIXED
+         setDownloadProgress(Math.floor(((i + 1) / segments.length) * 100));
 
       }
 
@@ -770,17 +707,15 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
 
 
 
-  const handleSelectVideo = (video, queue) => {
+ const handleSelectVideo = (video, queue) => {
+  localStorage.setItem("queue", JSON.stringify(queue));
+  localStorage.setItem(
+    "currentIndex",
+    queue.findIndex(v => v._id === video._id)
+  );
 
-    localStorage.setItem("queue", JSON.stringify(queue));
-
-    localStorage.setItem("currentIndex", queue.findIndex(v => v._id === video._id));
-
-
-
-    onSelectVideo(next);
-
-  };
+  onSelectVideo(video); // ✅ FIXED
+};
 
 
 
@@ -892,8 +827,9 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
 
     setCurrentTime(current);
 
-    setProgress((current / total) * 100);
-
+   if (total > 0) {
+  setProgress((current / total) * 100);
+}
 
 
     if (current > 5 && !viewCountedRef.current) {
@@ -1118,17 +1054,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
 
     if (next) {
 
-      onSelectVideo(next, {
-
-        queue,
-
-        playlistId: currentPlaylistId
-
-      }); // continue playlist
-
-    }
-
-  };
+      onSelectVideo(next); };
 
 
 
@@ -1187,10 +1113,19 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
 
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
           <div className="lg:col-span-8">
 
-            <div ref={playerContainerRef} onMouseMove={handleMouseMove} className="relative aspect-video w-full bg-slate-900/90 rounded-2xl overflow-hidden shadow-2xl border border-red-500/20 group">
+            <div 
+  ref={playerContainerRef} 
+  onMouseMove={handleMouseMove}
+  onClick={() => setShowControls(prev => !prev)}
+ className="relative aspect-video w-full bg-slate-900/90 rounded-2xl overflow-hidden shadow-2xl border border-red-500/20 group">
+
+{isBuffering && (
+    <div className="absolute inset-0 flex items-center justify-center bg-black/40 z-40 pointer-events-none">
+      <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  )}
 
               <video
 
@@ -1204,9 +1139,14 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
 
                 className="w-full h-full object-contain cursor-pointer bg-black"
 
-                onClick={togglePlay}
+                onClick={(e) => {
+e.stopPropagation();
+togglePlay();
+}}
 
                 onTimeUpdate={handleTimeUpdate}
+                onWaiting={() => setIsBuffering(true)}
+                onPlaying={() => setIsBuffering(false)}
 
               />
 
@@ -1420,7 +1360,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
 
                     >
 
-                      <Download size={18}
+                      <button
 
                         disabled={isDownloaded}
 
@@ -1980,7 +1920,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
 
                     <div className="relative w-40 aspect-video rounded-xl overflow-hidden bg-slate-700 shrink-0 border border-red-500/20">
 
-                      <img src={v.thumbnail} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
+                      <img loading="lazy" src={v.thumbnail} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
 
                     </div>
 
@@ -2008,7 +1948,7 @@ function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [],
 
                     <div className="relative w-40 aspect-video rounded-xl overflow-hidden bg-slate-700 shrink-0 border border-red-500/20">
 
-                      <img src={v.thumbnail} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
+                      <img loading="lazy" src={v.thumbnail} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
 
                     </div>
 

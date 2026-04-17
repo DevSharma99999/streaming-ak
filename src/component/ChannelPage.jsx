@@ -50,6 +50,7 @@ export default function ChannelPage({
 
         {channelData.coverImage ? (
           <img
+          loading="lazy"
             src={channelData.coverImage}
             className="w-full h-full object-cover"
             alt="cover"
@@ -68,6 +69,7 @@ export default function ChannelPage({
             <div className="w-28 h-28 rounded-full overflow-hidden bg-gradient-to-br from-red-600 to-red-800 border-4 border-red-400/30 shadow-xl">
               {channelData.avatar ? (
                 <img
+                loading="lazy"
                   src={channelData.avatar}
                   className="w-full h-full object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
                   onClick={() => setShowAvatar(true)}
@@ -121,6 +123,7 @@ export default function ChannelPage({
                 <div className="aspect-video rounded-xl overflow-hidden bg-slate-700 border border-red-500/20">
                   {video.thumbnail ? (
                     <img
+                    loading="lazy"
                       src={video.thumbnail}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       alt={video.title}
@@ -161,6 +164,7 @@ export default function ChannelPage({
           onClick={() => setShowAvatar(false)}
         >
           <img
+          loading="lazy"
             src={channelData.avatar}
             className="max-w-md w-full rounded-2xl shadow-2xl border border-red-500/20"
             alt="avatar large"

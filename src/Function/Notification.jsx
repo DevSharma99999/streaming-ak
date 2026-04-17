@@ -115,7 +115,7 @@ const NotificationsDropdown = ({ isDarkMode = true, setShow, closeDropdown }) =>
               </div>
 
               {/* Avatar */}
-              <img src={n.avatar} alt="" className="w-12 h-12 rounded-full flex-shrink-0 object-cover" />
+              <img loading="lazy" src={n.avatar} alt="" className="w-12 h-12 rounded-full flex-shrink-0 object-cover" />
               
               {/* Content */}
               <div className="flex-1 min-w-0">
@@ -128,7 +128,7 @@ const NotificationsDropdown = ({ isDarkMode = true, setShow, closeDropdown }) =>
               {/* Thumbnail (16:9 Style) */}
               {n.thumbnail && (
                 <div className="w-20 h-11 flex-shrink-0 rounded overflow-hidden bg-black/20">
-                  <img src={n.thumbnail} alt="" className="w-full h-full object-cover" />
+                  <img loading="lazy" src={n.thumbnail} alt="" className="w-full h-full object-cover" />
                 </div>
               )}
 
