@@ -24,7 +24,7 @@ import LikeDislike from "../Function/Like";
 
 
 
-function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [], playlistVideos = [], onSelectVideo, onSearchSubmit }) {
+function VideoPlayer({ video, onBack, isDarkMode, user, setUser, videoList = [], playlistVideos = [], onSelectVideo, onSearchSubmit ,audioUnlocked}) {
 
   const videoId = video?._id || video?.id;
 
