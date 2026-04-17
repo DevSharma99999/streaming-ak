@@ -519,7 +519,10 @@ useEffect(() => {
       ? currentVideo.videoUrl480
       : currentVideo.videoUrl;
 
-  if (!targetUrl) return;
+  if (!targetUrl) {
+  console.error("❌ Video URL missing", currentVideo);
+  return;
+}
 
   const lastTime = videoElement.currentTime;
   const wasPlaying = !videoElement.paused;
