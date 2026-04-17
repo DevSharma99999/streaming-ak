@@ -127,6 +127,25 @@ const [isBuffering, setIsBuffering] = useState(true);
 
 
   // Helper to format time (e.g., 153 -> 2:33)
+  const normalizeTags = (tags) => {
+  if (!tags) return [];
+
+  // Case 1: already array
+  if (Array.isArray(tags)) {
+    return tags.map(tag => tag.toLowerCase().trim());
+  }
+
+  // Case 2: string like "#karan #aujla"
+  if (typeof tags === "string") {
+    return tags
+      .split("#")                 // split by #
+      .map(tag => tag.trim())    // remove spaces
+      .filter(tag => tag.length > 0) // remove empty
+      .map(tag => tag.toLowerCase());
+  }
+
+  return [];
+};
 
   const formatTime = (timeInSeconds) => {
 
@@ -213,7 +232,7 @@ useEffect(() => {
 
             category: currentVideo.category,
 
-            tags: currentVideo.tags?.join(',')
+            tags: normalizeTags(currentVideo.tags).join(',')
 
           }
 
@@ -257,6 +276,8 @@ useEffect(() => {
         ]);
 
         const fetchedData = metaRes.data.data;
+
+fetchedData.tags = normalizeTags(fetchedData.tags);
 
         const startTime = video?.watchedTime !== undefined ? video.watchedTime : fetchedData.watchedTime;
 
