@@ -1219,7 +1219,7 @@ onClick={(e) => {
 
 
 
-              <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-between p-4 transition-opacity duration-300 ${showControls || !isPlaying ? 'opacity-100' : 'opacity-0'}`}>
+              <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-between p-4 transition-opacity duration-300 ${showControls || !isPlaying ? "opacity-100" : "opacity-0 hover:opacity-100"}`}>
 
                 <div className="flex justify-between items-center">
 
@@ -1263,7 +1263,7 @@ onClick={(e) => {
 
                       <p className="px-3 py-1 text-[10px] font-bold text-red-400 uppercase tracking-widest">Quality</p>
 
-                      <button onClick={() => { setCurrentResolution("360p"); setShowSettings(false); }} className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm transition ${currentResolution === "360p" ? 'bg-gradient-to-r from-red-600 to-red-700 text-white' : 'hover:bg-red-500/20 text-zinc-300'}`}>
+                      <button onClick={() => { setCurrentResolution("360p"); setShowSettings(false); }} className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm transition ${currentResolution === "360p" ? "bg-red-500/20 text-red-300" : "hover:bg-red-500/10"}`}>
 
                         360p {currentResolution === "360p" && <Check size={14} />}
 
@@ -1275,7 +1275,7 @@ onClick={(e) => {
 
                         onClick={() => { setCurrentResolution("480p"); setShowSettings(false); }}
 
-                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm transition ${!currentVideo.videoUrl480 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-red-500/20 text-zinc-300'} ${currentResolution === "480p" ? 'bg-gradient-to-r from-red-600 to-red-700 text-white' : ''}`}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm transition ${!currentVideo.videoUrl480 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-red-500/10'}`}
 
                       >
 
@@ -1291,7 +1291,7 @@ onClick={(e) => {
 
                       {[0.5, 1, 1.5, 2].map(speed => (
 
-                        <button key={speed} onClick={() => changeSpeed(speed)} className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm transition ${playbackSpeed === speed ? 'bg-gradient-to-r from-red-600 to-red-700 text-white' : 'hover:bg-red-500/20 text-zinc-300'}`}>
+                        <button key={speed} onClick={() => changeSpeed(speed)} className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm transition ${playbackSpeed === speed ? "bg-red-500/20 text-red-300" : "hover:bg-red-500/10"}`}>
 
                           {speed === 1 ? 'Normal' : `${speed}x`} {playbackSpeed === speed && <Check size={14} />}
 
@@ -1315,7 +1315,7 @@ onClick={(e) => {
 
                   </button>
 
-                  <button onClick={(e) => { e.stopPropagation(); togglePlay(); }} className="p-5 bg-red-600/80 hover:bg-red-500/90 backdrop-blur-sm rounded-full text-white transition-all duration-200 hover:scale-110 shadow-xl">
+                  <button onClick={(e) => { e.stopPropagation(); togglePlay(); }} className="p-5 bg-red-600/80 hover:bg-red-500/90 backdrop-blur-sm rounded-full text-white transition-all duration-200 hover:scale-110">
 
                     {isPlaying ? <Pause size={50} /> : <Play size={50} fill="white" />}
 
@@ -1371,13 +1371,13 @@ onClick={(e) => {
 
               <h1 className="text-2xl font-bold text-white mb-2">{currentVideo.title}</h1>
 
-              <div className="flex flex-wrap items-center justify-between gap-4 mt-3">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-4 px-1">
 
                 <div className="flex items-center gap-3">
 
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-600 to-red-700 overflow-hidden flex items-center justify-center border-2 border-red-400/30 shrink-0 font-bold text-white">
 
-                    {currentVideo.owner?.avatar ? <img src={currentVideo.owner.avatar} className="w-full h-full object-cover" alt="avatar" /> : (currentVideo.owner?.username || currentVideo.ownerName)?.charAt(0).toUpperCase()}
+                    {currentVideo.owner?.avatar ? <img src={currentVideo.owner.avatar} className="w-full h-full object-cover" alt="avatar" /> : (currentVideo.owner?.username || currentVideo.ownerName)?.[0]?.toUpperCase()}
 
                   </div>
 
@@ -1401,13 +1401,13 @@ onClick={(e) => {
 
 
 
-                <div className="flex items-center gap-3 bg-slate-800/50 backdrop-blur-sm p-2 rounded-2xl border border-red-500/20">
+                <div className="flex flex-wrap items-center gap-2 md:gap-3 bg-slate-800/50 backdrop-blur-sm p-2 md:p-3 rounded-2xl border border-red-500/20">
 
                   <LikeDislike key={`like-${videoId}`} videoId={videoId} user={user} />
 
                   <div className="w-[1px] h-6 bg-white/20 mx-1" />
 
-                  <button onClick={handleToggleWatchLater} className={`px-4 py-2 hover:bg-red-500/20 rounded-xl text-sm font-medium transition flex items-center gap-2 ${isWatchLater ? 'text-red-400' : 'text-white'}`}>
+                  <button onClick={handleToggleWatchLater} className={`px-3 md:px-4 py-2 hover:bg-red-500/20 rounded-xl text-xs md:text-sm font-medium transition flex items-center gap-2 whitespace-nowrap ${isWatchLater ? 'text-red-400' : 'text-gray-300'}`}>
 
                     <Clock size={18} fill={isWatchLater ? "currentColor" : "none"} /> {isWatchLater ? "Saved" : "Later"}
 
@@ -1417,7 +1417,7 @@ onClick={(e) => {
 
                     <button
   disabled={isDownloaded}
-  className={`px-4 py-2 rounded-full text-sm ${
+  className={`px-3 md:px-4 py-2 rounded-full text-xs md:text-sm whitespace-nowrap ${
     isDownloaded ? "bg-green-600" : "bg-white/10"
   }`}
   onClick={(e) => {
@@ -1487,9 +1487,7 @@ onClick={(e) => {
 
                     onClick={() => setShowPlaylist(true)}
 
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${isInPlaylist ? "bg-gradient-to-r from-red-600 to-red-700 text-white" : "hover:bg-red-500/20 text-white"
-
-                      }`}
+                    className={`px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm font-medium transition-all duration-200 whitespace-nowrap ${isInPlaylist ? "bg-gradient-to-r from-red-600 to-red-700 text-white" : "hover:bg-red-500/20 text-gray-300"}`}
 
                   >
 
@@ -1517,7 +1515,7 @@ onClick={(e) => {
 
                     disabled={summaryStatus === "loading"}
 
-                    className="px-4 py-2 rounded-xl text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white"
+                    className="px-3 py-2 rounded-xl text-xs sm:text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white whitespace-nowrap"
 
                   >
 
@@ -1945,7 +1943,7 @@ onClick={(e) => {
 
           </div>
 
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-4 mt-8 lg:mt-0">
 
             <h3 className="font-bold mb-4 text-white text-lg">Up Next</h3>
 
@@ -1991,7 +1989,7 @@ onClick={(e) => {
 
                 videoList.filter(v => (v._id || v.id) !== videoId).slice(0, 10).map((v) => (
 
-                  <div key={v.id || v._id} className="flex gap-3 cursor-pointer group bg-slate-800/30 backdrop-blur-sm p-3 rounded-2xl border border-red-500/10 hover:border-red-400/30 transition-all duration-200" onClick={() => onSelectVideo(v)}>
+                  <div key={v.id || v._id} className="flex gap-3 cursor-pointer group bg-slate-800/30 backdrop-blur-sm p-3 rounded-2xl border border-red-500/10 hover:border-red-400/30 transition-all duration-200">
 
                     <div className="relative w-40 aspect-video rounded-xl overflow-hidden bg-slate-700 shrink-0 border border-red-500/20">
 
