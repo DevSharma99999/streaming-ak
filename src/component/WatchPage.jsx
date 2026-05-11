@@ -937,19 +937,16 @@ useEffect(() => {
 
 
   const handleMouseMove = () => {
-    setShowControls(true);
-    if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
-    
-    // Auto-hide only if:
-    // 1. The video is actually playing
-    // 2. The Settings menu is NOT open
-    // 3. The Download menu is NOT open
-    if (isPlaying && !showSettings && !showDownloadMenu) {
-      controlsTimeoutRef.current = setTimeout(() => {
-        setShowControls(false);
-      }, 3000);
-    }
-  };
+  setShowControls(true);
+  if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
+  
+  // ONLY hide if playing and menus are CLOSED
+  if (isPlaying && !showSettings && !showDownloadMenu) {
+    controlsTimeoutRef.current = setTimeout(() => {
+      setShowControls(false);
+    }, 3000);
+  }
+};
 
   const handleToggleWatchLater = async () => {
 
@@ -1188,43 +1185,34 @@ useEffect(() => {
             <div 
   ref={playerContainerRef} 
   onMouseMove={handleMouseMove}
-  onClick={handleContainerClick}
+  // This ONLY triggers when clicking the black bars or empty space
+  onClick={() => setShowControls(prev => !prev)}
   className="relative aspect-video w-full bg-black rounded-2xl overflow-hidden shadow-2xl border border-red-500/20 group"
 >
-
-{isBuffering && (
+  {isBuffering && (
     <div className="absolute inset-0 flex items-center justify-center bg-black/40 z-40 pointer-events-none">
       <div className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
     </div>
   )}
 
-              <video
-
-                ref={videoRef}
-
-                onEnded={handleEnded}
-
-                poster={currentVideo.thumbnail || video?.thumbnail}
-
-                playsInline
-                autoPlay   // ✅ ADD THIS
-                muted={!audioUnlocked}   
-
-                className="w-full h-full object-contain cursor-pointer bg-black"
-
-
-onClick={(e) => {
-    e.stopPropagation(); // 1. Stops the container's toggle from firing
-    togglePlay();        // 2. Only performs the play/pause action
-  }}
-
-                 onWaiting={() => setIsBuffering(true)}
-  onPlaying={() => setIsBuffering(false)}
-  onCanPlay={() => setIsBuffering(false)}   // ✅ important
-  onSeeking={() => setIsBuffering(true)}    // ✅ when user skips
-  onSeeked={() => setIsBuffering(false)}  
-
-              />
+  <video
+    ref={videoRef}
+    onEnded={handleEnded}
+    poster={currentVideo.thumbnail || video?.thumbnail}
+    playsInline
+    autoPlay
+    muted={!audioUnlocked}
+    className="w-full h-full object-contain cursor-pointer bg-black"
+    onClick={(e) => {
+      e.stopPropagation(); // 1. Prevents hiding the UI when you just want to play/pause
+      togglePlay();
+    }}
+    onWaiting={() => setIsBuffering(true)}
+    onPlaying={() => setIsBuffering(false)}
+    onCanPlay={() => setIsBuffering(false)}
+    onSeeking={() => setIsBuffering(true)}
+    onSeeked={() => setIsBuffering(false)}
+  />
 
 
 
