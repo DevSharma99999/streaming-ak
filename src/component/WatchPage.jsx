@@ -300,7 +300,9 @@ fetchedData.tags = normalizeTags(fetchedData.tags);
 
         setComments(commRes.data.data || []);
 
-        if (metaRes.data.isWatchLater !== undefined) setIsWatchLater(metaRes.data.isWatchLater);
+        setIsWatchLater(metaRes.data.isWatchLater || metaRes.data.data?.isWatchLater || false);
+
+       await loadOfflineVideo(); // Try loading offline version if available  
 
       } catch (err) { console.error("Sync failed:", err); }
 
@@ -677,7 +679,10 @@ useEffect(() => {
 
   };
 
-
+const handleContainerClick = () => {
+    // This toggles the controls when the background is clicked
+    setShowControls(prev => !prev);
+  };
 
   const handleOfflineSave = async (m3u8Url, id) => {
 
@@ -932,16 +937,19 @@ useEffect(() => {
 
 
   const handleMouseMove = () => {
-
     setShowControls(true);
-
     if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
-
-    controlsTimeoutRef.current = setTimeout(() => { if (isPlaying && !showSettings) setShowControls(false); }, 3000);
-
+    
+    // Auto-hide only if:
+    // 1. The video is actually playing
+    // 2. The Settings menu is NOT open
+    // 3. The Download menu is NOT open
+    if (isPlaying && !showSettings && !showDownloadMenu) {
+      controlsTimeoutRef.current = setTimeout(() => {
+        setShowControls(false);
+      }, 3000);
+    }
   };
-
-
 
   const handleToggleWatchLater = async () => {
 
@@ -1180,8 +1188,9 @@ useEffect(() => {
             <div 
   ref={playerContainerRef} 
   onMouseMove={handleMouseMove}
-  onClick={() => setShowControls(prev => !prev)}
- className="relative aspect-video w-full bg-slate-900/90 rounded-2xl overflow-hidden shadow-2xl border border-red-500/20 group">
+  onClick={handleContainerClick}
+  className="relative aspect-video w-full bg-black rounded-2xl overflow-hidden shadow-2xl border border-red-500/20 group"
+>
 
 {isBuffering && (
     <div className="absolute inset-0 flex items-center justify-center bg-black/40 z-40 pointer-events-none">
@@ -1205,9 +1214,9 @@ useEffect(() => {
 
 
 onClick={(e) => {
-  e.stopPropagation();
-  togglePlay();
-}}
+    e.stopPropagation(); // 1. Stops the container's toggle from firing
+    togglePlay();        // 2. Only performs the play/pause action
+  }}
 
                  onWaiting={() => setIsBuffering(true)}
   onPlaying={() => setIsBuffering(false)}
@@ -1219,7 +1228,11 @@ onClick={(e) => {
 
 
 
-              <div className={`absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-between p-4 transition-opacity duration-300 ${showControls || !isPlaying ? 'opacity-100' : 'opacity-0'}`}>
+              <div 
+  className={`absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/40 flex flex-col justify-between p-4 transition-opacity duration-300 
+    ${showControls || !isPlaying ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+  onClick={(e) => e.stopPropagation()} // Clicking the UI overlay won't toggle controls off
+>
 
                 <div className="flex justify-between items-center">
 
