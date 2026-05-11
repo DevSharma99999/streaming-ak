@@ -268,49 +268,35 @@ useEffect(() => {
 
   // --- 1. DATA SYNC ---
 
+// --- 1. DATA SYNC (Meta, Comments, Playlists, Watch Later) ---
   useEffect(() => {
-
     if (!videoId) return;
 
-    viewCountedRef.current = false;
-
     const loadData = async () => {
-
       try {
-
-        const [metaRes, commRes] = await Promise.all([
-
+        const [metaRes, commRes, playlistRes] = await Promise.all([
           axios.get(`${import.meta.env.VITE_API_URL}/api/v1/videos/v/${videoId}`, { withCredentials: true }),
-
-          axios.get(`${import.meta.env.VITE_API_URL}/api/v1/comments/${videoId}`)
-
+          axios.get(`${import.meta.env.VITE_API_URL}/api/v1/comments/${videoId}`),
+          user ? axios.get(`${import.meta.env.VITE_API_URL}/api/v1/playlists`, { withCredentials: true }) : Promise.resolve({ data: { data: [] } })
         ]);
 
         const fetchedData = metaRes.data.data;
-
-fetchedData.tags = normalizeTags(fetchedData.tags);
-
-        const startTime = video?.watchedTime !== undefined ? video.watchedTime : fetchedData.watchedTime;
-
-
-
-        setCurrentVideo(prev => ({ ...prev, ...fetchedData, watchedTime: startTime }));
-
+        setCurrentVideo(prev => ({ ...prev, ...fetchedData }));
         setSubCount(metaRes.data.subCount || 0);
-
         setComments(commRes.data.data || []);
-
-        setIsWatchLater(metaRes.data.isWatchLater || metaRes.data.data?.isWatchLater || false);
-
-       await loadOfflineVideo(); // Try loading offline version if available  
+        
+        // SYNC STATUS
+        setIsWatchLater(metaRes.data.isWatchLater || fetchedData.isWatchLater || false);
+        
+        const allPlaylists = playlistRes.data.data || [];
+        setPlaylists(allPlaylists);
+        setIsInPlaylist(allPlaylists.some(p => p.videos?.includes(videoId)));
 
       } catch (err) { console.error("Sync failed:", err); }
-
     };
-
     loadData();
-
-  }, [videoId]);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [videoId, user]); // VideoId and User are the critical triggers
 
 
 
@@ -1187,13 +1173,13 @@ useEffect(() => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8">
 
-            <div 
+           <div 
   ref={playerContainerRef} 
   onMouseMove={handleMouseMove}
-  // Change here: Only toggle if clicking the actual background, not children
+  // CHANGE: Only toggle if the click is on the actual background, not buttons
   onClick={(e) => {
-    if (e.target === e.currentTarget) handleContainerClick();
-  }} 
+    if (e.target === e.currentTarget) setShowControls(prev => !prev);
+  }}
   className="relative aspect-video w-full bg-black rounded-2xl overflow-hidden shadow-2xl border border-red-500/20 group"
 >
   {isBuffering && (
@@ -1223,9 +1209,10 @@ useEffect(() => {
 
 
 
-              <div 
+             <div 
+  // ADD: pointer-events logic and z-index
   className={`absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/40 flex flex-col justify-between p-4 transition-opacity duration-300 
-    ${showControls || !isPlaying ? 'opacity-100 pointer-events-auto z-50' : 'opacity-0 pointer-events-none z-0'}`}
+    ${showControls || !isPlaying ? 'opacity-100 pointer-events-auto z-10' : 'opacity-0 pointer-events-none z-0'}`}
   onClick={(e) => e.stopPropagation()} 
 >
 
