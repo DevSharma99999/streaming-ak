@@ -937,14 +937,19 @@ useEffect(() => {
 
 
   const handleMouseMove = () => {
+  // 1. Always show controls when mouse moves
   setShowControls(true);
-  if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current);
   
-  // ONLY hide if playing and menus are CLOSED
+  // 2. Clear any existing timer so they don't fight
+  if (controlsTimeoutRef.current) {
+    clearTimeout(controlsTimeoutRef.current);
+  }
+  
+  // 3. Only set a new hide-timer if video is playing AND no menus are open
   if (isPlaying && !showSettings && !showDownloadMenu) {
     controlsTimeoutRef.current = setTimeout(() => {
       setShowControls(false);
-    }, 3000);
+    }, 3000); // 3 seconds
   }
 };
 
@@ -1185,8 +1190,10 @@ useEffect(() => {
             <div 
   ref={playerContainerRef} 
   onMouseMove={handleMouseMove}
-  // This ONLY triggers when clicking the black bars or empty space
-  onClick={() => setShowControls(prev => !prev)}
+  // Change here: Only toggle if clicking the actual background, not children
+  onClick={(e) => {
+    if (e.target === e.currentTarget) handleContainerClick();
+  }} 
   className="relative aspect-video w-full bg-black rounded-2xl overflow-hidden shadow-2xl border border-red-500/20 group"
 >
   {isBuffering && (
@@ -1218,8 +1225,8 @@ useEffect(() => {
 
               <div 
   className={`absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/40 flex flex-col justify-between p-4 transition-opacity duration-300 
-    ${showControls || !isPlaying ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
-  onClick={(e) => e.stopPropagation()} // Clicking the UI overlay won't toggle controls off
+    ${showControls || !isPlaying ? 'opacity-100 pointer-events-auto z-50' : 'opacity-0 pointer-events-none z-0'}`}
+  onClick={(e) => e.stopPropagation()} 
 >
 
                 <div className="flex justify-between items-center">
