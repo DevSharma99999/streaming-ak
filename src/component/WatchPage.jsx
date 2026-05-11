@@ -1087,7 +1087,32 @@ useEffect(() => {
 
   };
 
+const loadVideoData = async () => {
+  try {
+    const [metaRes, playlistRes] = await Promise.all([
+      axios.get(`${import.meta.env.VITE_API_URL}/api/v1/videos/v/${videoId}`, { withCredentials: true }),
+      user ? axios.get(`${import.meta.env.VITE_API_URL}/api/v1/playlists`, { withCredentials: true }) : null
+    ]);
 
+    const fetchedData = metaRes.data.data;
+    
+    // 1. Sync Watch Later: Check both the specific flag AND the user's local profile if available
+    const watchLaterStatus = metaRes.data.isWatchLater || user?.watchLater?.includes(videoId);
+    setIsWatchLater(!!watchLaterStatus);
+
+    // 2. Sync Playlist: Check if this videoId exists in any of the fetched playlists
+    if (playlistRes) {
+      const allPlaylists = playlistRes.data.data || [];
+      setPlaylists(allPlaylists);
+      const existsInAny = allPlaylists.some(p => p.videos.includes(videoId));
+      setIsInPlaylist(existsInAny);
+    }
+    
+    setCurrentVideo(fetchedData);
+  } catch (err) {
+    console.error("Sync Error", err);
+  }
+};
 
 
 
@@ -1176,9 +1201,12 @@ useEffect(() => {
            <div 
   ref={playerContainerRef} 
   onMouseMove={handleMouseMove}
-  // CHANGE: Only toggle if the click is on the actual background, not buttons
   onClick={(e) => {
-    if (e.target === e.currentTarget) setShowControls(prev => !prev);
+    // ONLY toggle if the user clicked the actual black bars/background
+    // NOT when they click the video or buttons
+    if (e.target === e.currentTarget) {
+      setShowControls(prev => !prev);
+    }
   }}
   className="relative aspect-video w-full bg-black rounded-2xl overflow-hidden shadow-2xl border border-red-500/20 group"
 >
@@ -1209,11 +1237,14 @@ useEffect(() => {
 
 
 
-             <div 
-  // ADD: pointer-events logic and z-index
+             {/* THE UI OVERLAY */}
+<div 
   className={`absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/40 flex flex-col justify-between p-4 transition-opacity duration-300 
-    ${showControls || !isPlaying ? 'opacity-100 pointer-events-auto z-10' : 'opacity-0 pointer-events-none z-0'}`}
-  onClick={(e) => e.stopPropagation()} 
+    ${showControls || !isPlaying ? 'opacity-100 pointer-events-auto z-20' : 'opacity-0 pointer-events-none z-0'}`}
+  onClick={(e) => {
+    e.stopPropagation(); 
+    // This stops the overlay itself from triggering the container's toggle
+  }} 
 >
 
                 <div className="flex justify-between items-center">
