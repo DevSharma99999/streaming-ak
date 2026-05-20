@@ -188,12 +188,9 @@ const [isBuffering, setIsBuffering] = useState(true);
 
 
 
-        const exists = res.data.data.some(p =>
-
-          p.videos?.includes(videoId)
-
-        );
-
+       const exists = res.data.data.some(p =>
+  p.videos?.some(v => (v._id || v).toString() === videoId.toString())
+);
 
 
         setIsInPlaylist(exists);
@@ -274,11 +271,30 @@ useEffect(() => {
 
     const loadData = async () => {
       try {
-        const [metaRes, commRes, playlistRes] = await Promise.all([
-          axios.get(`${import.meta.env.VITE_API_URL}/api/v1/videos/v/${videoId}`, { withCredentials: true }),
-          axios.get(`${import.meta.env.VITE_API_URL}/api/v1/comments/${videoId}`),
-          user ? axios.get(`${import.meta.env.VITE_API_URL}/api/v1/playlists`, { withCredentials: true }) : Promise.resolve({ data: { data: [] } })
-        ]);
+       const [metaRes, commRes, playlistRes, watchLaterRes] = await Promise.all([
+  axios.get(
+    `${import.meta.env.VITE_API_URL}/api/v1/videos/v/${videoId}`,
+    { withCredentials: true }
+  ),
+
+  axios.get(
+    `${import.meta.env.VITE_API_URL}/api/v1/comments/${videoId}`
+  ),
+
+  user
+    ? axios.get(
+        `${import.meta.env.VITE_API_URL}/api/v1/playlists`,
+        { withCredentials: true }
+      )
+    : Promise.resolve({ data: { data: [] } }),
+
+  user
+    ? axios.get(
+        `${import.meta.env.VITE_API_URL}/api/v1/videos/v/${videoId}/watch-later`,
+        { withCredentials: true }
+      )
+    : Promise.resolve({ data: { isWatchLater: false } })
+]);
 
         const fetchedData = metaRes.data.data;
         setCurrentVideo(prev => ({ ...prev, ...fetchedData }));
@@ -286,11 +302,15 @@ useEffect(() => {
         setComments(commRes.data.data || []);
         
         // SYNC STATUS
-        setIsWatchLater(metaRes.data.isWatchLater || fetchedData.isWatchLater || false);
+        setIsWatchLater(watchLaterRes.data.isWatchLater || false);
         
         const allPlaylists = playlistRes.data.data || [];
         setPlaylists(allPlaylists);
-        setIsInPlaylist(allPlaylists.some(p => p.videos?.includes(videoId)));
+        setIsInPlaylist(
+  allPlaylists.some(p =>
+    p.videos?.some(v => (v._id || v).toString() === videoId.toString())
+  )
+);
 
       } catch (err) { console.error("Sync failed:", err); }
     };
@@ -1104,7 +1124,9 @@ const loadVideoData = async () => {
     if (playlistRes) {
       const allPlaylists = playlistRes.data.data || [];
       setPlaylists(allPlaylists);
-      const existsInAny = allPlaylists.some(p => p.videos.includes(videoId));
+      const existsInAny = allPlaylists.some(p =>
+  p.videos?.some(v => (v._id || v).toString() === videoId.toString())
+);
       setIsInPlaylist(existsInAny);
     }
     
@@ -1198,16 +1220,9 @@ const loadVideoData = async () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8">
 
-           <div 
-  ref={playerContainerRef} 
+           <div
+  ref={playerContainerRef}
   onMouseMove={handleMouseMove}
-  onClick={(e) => {
-    // ONLY toggle if the user clicked the actual black bars/background
-    // NOT when they click the video or buttons
-    if (e.target === e.currentTarget) {
-      setShowControls(prev => !prev);
-    }
-  }}
   className="relative aspect-video w-full bg-black rounded-2xl overflow-hidden shadow-2xl border border-red-500/20 group"
 >
   {isBuffering && (
@@ -1216,24 +1231,22 @@ const loadVideoData = async () => {
     </div>
   )}
 
-  <video
-    ref={videoRef}
-    onEnded={handleEnded}
-    poster={currentVideo.thumbnail || video?.thumbnail}
-    playsInline
-    autoPlay
-    muted={!audioUnlocked}
-    className="w-full h-full object-contain cursor-pointer bg-black"
-    onClick={(e) => {
-      e.stopPropagation(); // 1. Prevents hiding the UI when you just want to play/pause
-      togglePlay();
-    }}
-    onWaiting={() => setIsBuffering(true)}
-    onPlaying={() => setIsBuffering(false)}
-    onCanPlay={() => setIsBuffering(false)}
-    onSeeking={() => setIsBuffering(true)}
-    onSeeked={() => setIsBuffering(false)}
-  />
+ <video
+  ref={videoRef}
+  onEnded={handleEnded}
+  poster={currentVideo.thumbnail || video?.thumbnail}
+  playsInline
+  autoPlay
+  muted={!audioUnlocked}
+  className="w-full h-full object-contain cursor-pointer bg-black"
+  onClick={(e) => {
+    e.stopPropagation();
+    togglePlay();
+  }}
+  onDoubleClick={() => {
+    setShowControls(prev => !prev);
+  }}
+/>
 
 
 
