@@ -55,7 +55,7 @@ const Profile = ({ isDarkMode, onBack, user, profileData: profileDataProp, onSel
   const handleDelete = async (videoId) => {
     if (!window.confirm("Delete this video?")) return;
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/v1/videos/delete/${videoId}`, { withCredentials: true });
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/v1/videos/delete/${videoId}`, { withCredentials: true });
       setProfileData({
         ...profileData,
         videos: profileData.videos.filter(v => v._id !== videoId)

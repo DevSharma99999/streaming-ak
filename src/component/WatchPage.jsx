@@ -627,7 +627,7 @@ useEffect(() => {
 
   const handleTagClick = (tag) => {
   if (onSearchSubmit) {
-    onSearchSubmit([tag.trim()]);
+    onSearchSubmit(tag.trim(),true);
   }
 };
 
@@ -1057,34 +1057,32 @@ useEffect(() => {
 
   // Update comment state
 
-  const updateComment = (updated) => {
-
-    setComments(prev =>
-
-      prev.map(c => {
-
-        if (c._id === updated._id) return updated;
-
-
-
+const updateComment = (updated) => {
+  setComments(prev =>
+    prev.map(c => {
+      // MAIN COMMENT
+      if (c._id === updated._id) {
         return {
-
-          ...c,
-
-          replies: c.replies?.map(r =>
-
-            r._id === updated._id ? updated : r
-
-          )
-
+          ...c,       // keep old user/content
+          ...updated  // update likes/dislikes
         };
+      }
 
-      })
-
-    );
-
-  };
-
+      // REPLIES
+      return {
+        ...c,
+        replies: c.replies?.map(r =>
+          r._id === updated._id
+            ? {
+                ...r,
+                ...updated
+              }
+            : r
+        )
+      };
+    })
+  );
+};
 
 
   const handleDownload = async (url) => {
