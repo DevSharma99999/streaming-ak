@@ -685,10 +685,7 @@ useEffect(() => {
 
   };
 
-const handleContainerClick = () => {
-    // This toggles the controls when the background is clicked
-    setShowControls(prev => !prev);
-  };
+
 
   const handleOfflineSave = async (m3u8Url, id) => {
 
@@ -1031,7 +1028,7 @@ useEffect(() => {
 
           c._id === id
 
-            ? { ...c, replies: [...(c.replies || []), res.data] }
+            ? { ...c, replies: [...(c.replies || []), res.data.data] }
 
             : c
 
@@ -1060,22 +1057,23 @@ useEffect(() => {
 const updateComment = (updated) => {
   setComments(prev =>
     prev.map(c => {
-      // MAIN COMMENT
       if (c._id === updated._id) {
         return {
-          ...c,       // keep old user/content
-          ...updated  // update likes/dislikes
+          ...updated,
+          user: c.user,
+          content: c.content,
+          replies: c.replies
         };
       }
 
-      // REPLIES
       return {
         ...c,
         replies: c.replies?.map(r =>
           r._id === updated._id
             ? {
-                ...r,
-                ...updated
+                ...updated,
+                user: r.user,
+                content: r.content
               }
             : r
         )
@@ -1239,9 +1237,8 @@ const loadVideoData = async () => {
   className="w-full h-full object-contain cursor-pointer bg-black"
   onClick={(e) => {
     e.stopPropagation();
-    togglePlay();
-  }}
-  onDoubleClick={() => {
+
+    // only toggle controls
     setShowControls(prev => !prev);
   }}
 />
@@ -1252,10 +1249,7 @@ const loadVideoData = async () => {
 <div 
   className={`absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/40 flex flex-col justify-between p-4 transition-opacity duration-300 
     ${showControls || !isPlaying ? 'opacity-100 pointer-events-auto z-20' : 'opacity-0 pointer-events-none z-0'}`}
-  onClick={(e) => {
-    e.stopPropagation(); 
-    // This stops the overlay itself from triggering the container's toggle
-  }} 
+  onClick={(e) => e.stopPropagation()}
 >
 
                 <div className="flex justify-between items-center">
