@@ -12,33 +12,107 @@ export default function AuthModal({ isOpen, onClose, isDarkMode, setUser }) {
 
   if (!isOpen) return null;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    const endpoint = isLogin ? "/users/login" : "/users/register";
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   const endpoint = isLogin ? "/users/login" : "/users/register";
 
-    try {
-      const payload = isLogin
-        ? { email: formData.email, password: formData.password }
-        : formData;
+  //   try {
+  //     const payload = isLogin
+  //       ? { email: formData.email, password: formData.password }
+  //       : formData;
 
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1${endpoint}`, payload, {
-        withCredentials: true
-      });
+  //     const res = await axios.post(`${import.meta.env.VITE_API_URL}/api/v1${endpoint}`, payload, {
+  //       withCredentials: true
+  //     });
 
-      if (isLogin) {
-        const loggedInUser = res.data?.data?.user || res.data?.data || res.data;
-        setUser(loggedInUser);
-        onClose();
-      } else {
-        setStep(2); // Move to Registration OTP
+  //     if (isLogin) {
+  //       const loggedInUser = res.data?.data?.user || res.data?.data || res.data;
+  //       setUser(loggedInUser);
+  //       onClose();
+  //     } else {
+  //       setStep(2); // Move to Registration OTP
+  //     }
+  //   } catch (err) {
+  //     alert(`Error: ${err.response?.data?.message || err.message}`);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (loading) return;
+
+  setLoading(true);
+
+  const endpoint = isLogin ? "/users/login" : "/users/register";
+
+  try {
+    const payload = isLogin
+      ? {
+          email: formData.email.trim().toLowerCase(),
+          password: formData.password
+        }
+      : {
+          ...formData,
+          email: formData.email.trim().toLowerCase(),
+          username: formData.username.trim()
+        };
+
+    console.log("========== LOGIN REQUEST ==========");
+    console.log("API URL:", import.meta.env.VITE_API_URL);
+    console.log("Endpoint:", endpoint);
+    console.log("Email:", payload.email);
+    console.log("Password length:", payload.password?.length);
+    console.log("Password:", payload.password);
+
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_URL}/api/v1${endpoint}`,
+      payload,
+      {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json"
+        }
       }
-    } catch (err) {
-      alert(`Error: ${err.response?.data?.message || err.message}`);
-    } finally {
-      setLoading(false);
+    );
+
+    console.log("========== LOGIN RESPONSE ==========");
+    console.log("Status:", res.status);
+    console.log("Response:", res.data);
+
+    if (isLogin) {
+      const loggedInUser =
+        res.data?.data?.user ||
+        res.data?.data ||
+        res.data;
+
+      setUser(loggedInUser);
+      onClose();
+    } else {
+      setStep(2);
     }
-  };
+
+  } catch (err) {
+    console.error("========== LOGIN ERROR ==========");
+    console.error("Status:", err.response?.status);
+    console.error("Response:", err.response?.data);
+    console.error("Request:", err.config?.url);
+    console.error("Sent data:", err.config?.data);
+
+    alert(
+      `Error: ${
+        err.response?.data?.message ||
+        err.message ||
+        "Login failed"
+      }`
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
